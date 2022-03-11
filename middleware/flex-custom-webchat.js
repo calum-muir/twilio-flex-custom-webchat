@@ -10,11 +10,11 @@ const client = require('twilio')(
 
 var flexChannelCreated;
 
-function sendChatMessage(serviceSid, channelSid, chatUserName, body) {
+function sendChatMessage(serviceSid, channelSid, whatsappId, body) {
   console.log('Sending new chat message');
   const params = new URLSearchParams();
   params.append('Body', body);
-  params.append('From', chatUserName);
+  params.append('From', whatsappId);
   return fetch(
     `https://chat.twilio.com/v2/Services/${serviceSid}/Channels/${channelSid}/Messages`,
     {
@@ -30,15 +30,15 @@ function sendChatMessage(serviceSid, channelSid, chatUserName, body) {
   );
 }
 
-function createNewChannel(flexFlowSid, flexChatService, chatUserName) {
+function createNewChannel(flexFlowSid, flexChatService, whatsappId) {
   return client.flexApi.channel
     .create({
       // flexFlowSid: process.env.FLEX_FLOW_SID,
       flexFlowSid: flexFlowSid,
-      identity: chatUserName,
-      chatUserFriendlyName: chatUserName,
+      identity: whatsappId,
+      chatUserFriendlyName: whatsappId,
       chatFriendlyName: 'Flex Custom Chat',
-      target: chatUserName
+      target: whatsappId
     })
     .then(channel => {
       console.log(`Created new channel ${channel.sid}`);
@@ -73,18 +73,18 @@ async function resetChannel(status) {
   }
 }
 
-async function sendMessageToFlex(msg) {
+async function sendMessageToFlex(msg, whatsappId) {
   if (!flexChannelCreated) {
     flexChannelCreated = await createNewChannel(
       process.env.FLEX_FLOW_SID,
       process.env.FLEX_CHAT_SERVICE,
-      'custom-chat-user'
+      whatsappId
     );
   }
   sendChatMessage(
     process.env.FLEX_CHAT_SERVICE,
     flexChannelCreated,
-    'socketio-chat-user',
+    whatsappId,
     msg
   );
 }
